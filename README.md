@@ -4,4 +4,6 @@ This repository contains the scripts for GWAS analysis of Finnish pediatric tubu
 
 ## code (./src)
 
-`Main.sh` Shell script for calling various subscripts for managing and running the GWAS using SPAtest
+`Main.sh` Shell script for calling various subscripts for managing and running the GWAS
+`runSPAtest.R` R script for running SPAtest
+`runSNPHLA.sh` Shell script for running HLA imputation using SNP2HLA
