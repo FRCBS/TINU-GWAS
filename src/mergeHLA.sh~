@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## ------------------------------------------------------------------------------
+## extract HLA region from IC1 & IC3 donors and TIN(U) patients 
+## ------------------------------------------------------------------------------
+
+module load plink/1.90b4.1
+
+# IC1
+cat ./data/IC3F.fam | grep 'DT\|TIN' > indiv
+plink -bfile ./data/IC3F --keep ./data/indiv --chr 6 --from-mb 29 --to-mb 35 --make-bed --out ./data/IC3F_TIN_HLA
+rm -f ./data/indiv
+
+# IC3
+cat ./data/IC1_cleaned.fam | grep 'DT\|TIN' > ./data/indiv
+# DT5462 & DT5302 repeats removed with nano
+plink -bfile ./data/IC1_cleaned --keep ./data/indiv --chr 6 --from-mb 29 --to-mb 35 --make-bed --out ./data/IC1_HLA
+rm -f ./data/indiv
+
+# merge
+plink --bfile ./data/IC1_HLA --bmerge ./data/IC3F_TIN_HLA --make-bed --allow-no-sex --geno 0.01 --out ./data/IC1_IC3_FIN_HLA
+
+

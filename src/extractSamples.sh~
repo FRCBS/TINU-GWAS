@@ -1,0 +1,15 @@
+#!/bin/bash
+
+module load plink/1.90b4.1
+
+cd /proj/2000066/IC3/TINU/IC1-IC3-FIN-combined
+
+# plink binary output
+plink --bfile IC1-IC3_imputed.merged --keep samples.list --make-bed --out ICFIN_imp 
+
+# dosage format for SPAtest
+#plink --bfile IC1_imp_commonSNPs_samples --geno 0.1 --recode A --out ICFIN_imp
+
+
+
+
