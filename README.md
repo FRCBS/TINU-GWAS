@@ -8,4 +8,3 @@ This repository contains the scripts for GWAS analysis of Finnish pediatric tubu
 
 `runSPAtest.R` R script for running SPAtest
 
-`runSNPHLA.sh` Shell script for running HLA imputation using SNP2HLA
