@@ -85,9 +85,10 @@ dev.off()
 ## Manhattans
 ## --------------------------------------------------------
 
+# input data columns: SNP CHR BP P
 source('~/Projects/gamete/src/GGManhattan.R')
-# SNP CHR BP P
 
+                         
 # Whole genome
 
 tmp <- SPA.TIN
@@ -129,15 +130,15 @@ tmp <-SPA.TIN %>% filter(., CHR=='6', POS>29e6, POS<35e6)
 colnames(tmp) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
 tmp$CHR <- paste0('CHR ', tmp$CHR)
 
-p1 <- ggplot(tmp, aes(BP/1e6, -log10(P))) +
+p1 <- ggplot(tmp, aes(BP/1e6, log10(P) %>% ´*´(-1) )) +
   geom_point(size=0.2, color='blue', alpha=0.5, shape=19) +
   xlab('Chr 6 position (Mb)') +
   ylab(expression('-log'[10]*'(p-value)')) +
   geom_point(data=tmp %>% filter(P<5e-8), aes(x=BP/1e6, y=-log10(P)), 
              color='red', shape=5, fill='red', alpha=0.8) +
   #facet_grid(. ~ CHR) +
-  geom_hline(yintercept=-log10(5e-8), color='red', alpha=0.8, size=0.3) +
-  geom_hline(yintercept=-log10(tmp.fdr), color='red', alpha=0.8, size=0.3, linetype='dashed') +
+  geom_hline(yintercept=log10(5e-8) %>% ´*´(-1), color='red', alpha=0.8, size=0.3) +
+  geom_hline(yintercept=log10(tmp.fdr) %>% ´*´(-1), color='red', alpha=0.8, size=0.3, linetype='dashed') +
   annotate("rect", xmin=33.01, xmax=33.2, ymin=0, ymax=8.1, alpha=.12) +
   annotate("rect", xmin=32.55, xmax=32.7, ymin=0, ymax=8.1, alpha=.12) +
   annotate("text", x=33.01+2e-1, y=8.25, label='HLA-DPA1/DPB1', colour='grey20', size=3, fontface='italic') +
@@ -154,15 +155,15 @@ tmp2 <- SPA.TINU %>% filter(., CHR=='9', POS>25.0e6, POS<32.0e6)
 colnames(tmp2) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
 tmp2$CHR <- paste0('CHR ', tmp2$CHR)
 
-p2 <- ggplot(tmp2, aes(BP/1e6, -log10(P))) +
+p2 <- ggplot(tmp2, aes(BP/1e6, log10(P) %>% ´*´(-1))) +
   geom_point(size=0.2, color='blue', alpha=0.5, shape=19) +
   xlab('Chr 9 position (Mb)') +
   ylab(expression('-log'[10]*'(p-value)')) +
   geom_point(data=tmp2 %>% filter(P<5e-8), aes(x=BP/1e6, y=-log10(P)), 
              color='red', shape=5, fill='red', alpha=0.8) +
   #facet_grid(. ~ CHR) +
-  geom_hline(yintercept=-log10(5e-8), color='red', alpha=0.8, size=0.3) +
-  geom_hline(yintercept=-log10(tmp2.fdr), color='red', alpha=0.8, size=0.3, linetype='dashed') +
+  geom_hline(yintercept=log10(5e-8) %>% ´*´(-1), color='red', alpha=0.8, size=0.3) +
+  geom_hline(yintercept=log10(tmp2.fdr) %>% ´*´(-1), color='red', alpha=0.8, size=0.3, linetype='dashed') +
   annotate("rect", xmin=27.948, xmax=28.670, ymin=0, ymax=8.1, alpha=.1) +
   annotate("text", x=28.30, y=8.4, label='LINGO2', colour='grey20', size=3, fontface='italic') +
   theme_classic2() +
@@ -170,9 +171,6 @@ p2 <- ggplot(tmp2, aes(BP/1e6, -log10(P))) +
   theme(panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank()) +
   scale_x_continuous(breaks=seq(25, 32, 2)) +
   scale_y_continuous(expand=c(0, .2), limits=c(0, 8.55)) 
-  # theme(strip.background=element_rect(fill="grey80", color='white'),
-  #       strip.text.x=element_text(color="white", face='bold'))
-
 
 cairo_pdf('./results/TIN_TINU_Manhattans.pdf', height=4, width=9)
 ggpubr::ggarrange(p1, p2, ncol=2, widths=c(1, 0.8), labels=c('a', 'b'))
@@ -203,31 +201,24 @@ lingo2.ensembl$feature_type_name %>% table
 atrack1 <- AnnotationTrack(start=lingo2.ensembl$chromosome_start, end=lingo2.ensembl$chromosome_end, 
                            feature=lingo2.ensembl$feature_type_name, id=lingo2.ensembl$regulatory_stable_id,
                            chromosome='chr9', genome='hg19', name="REG", stacking='dense', 
-                           #Promoter_Flanking_Region='purple3', TF_binding_site='purple3',
-                           #CTCF_Binding_Site='#ffe0f9', Enhancer='#ffe0f9', Open_chromatin='#ffe0f9',
                            Promoter_Flanking_Region='grey30', TF_binding_site='grey30',
                            CTCF_Binding_Site='grey90', Enhancer='grey90', Open_chromatin='grey90',
                            background.title="grey80", fontface.axis=1, fontface.title=2)
-                           #background.title="white", col.axis="grey", col.title="grey", col.border.title="grey")
-
-
+ 
 dtrack1 <- DataTrack(data=lingo.cis$V1 %>% -log10(.), start=lingo.cis$V4, end=lingo.cis$V4, 
                      chromosome='chr9', genome='hg19', name="eQTL", type='h', 
                      background.title="grey80", fontface.axis=1, fontface.title=2)
-                     #background.title="white", col.axis="grey", col.title="grey", col.border.title="grey")
 
 dtrack2 <- DataTrack(data=SPA.TINU[SPA.TINU.lingo.ind, ]$PVALUE %>% -log10(.), 
                      start=SPA.TINU[SPA.TINU.lingo.ind, ]$POS, end=SPA.TINU[SPA.TINU.lingo.ind, ]$POS, 
                      chromosome='chr9', genome='hg19', name="TINU GWAS", type='h', aggregation='max', window=100,
                      baseline=-log10(9.151029e-06), col.baseline='skyblue1', lty.baseline='dashed',
                      background.title="grey80", fontface.axis=1, fontface.title=2)
-                     #background.title="white", col.axis="grey", col.title="grey", col.border.title="grey")
 
 biomTrack <- BiomartGeneRegionTrack(genome="hg19", symbol='LINGO2', name="ENSEMBL Gene",
                                     transcriptAnnotation="symbol", collapse=F,
                                     pseudogene='red', utr5='orange', non_coding='cyan', min.height=3,
                                     background.title="grey80", fontface.axis=1, fontface.title=2)
-                                    #background.title="white", col.axis="grey", col.title="grey", col.border.title="grey")
 biomTrack %>% feature %>% unique
 
 cairo_pdf('./results/eQTL_tracks.pdf', height=4, width=8)
@@ -278,10 +269,10 @@ ggplot(ped.gen.num[nrow(ped.gen.num):1, ],
        aes(Var1, Var2, fill=value %>% factor(., levels=c('minor', 'heterozygote', 'major')))) +
   geom_tile() +
   facet_wrap(~ChronicUv, scales='free_x') +
-  xlab('TIN patients') +
+  xlab('TIN(U) patients') +
   ylab('LINGO2 SNPs') +
   theme_light() +
-  theme(axis.text.x=element_text(angle=0, hjust=1, size=8), panel.grid=element_blank()) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7), panel.grid=element_blank()) +
   theme(strip.background=element_rect(fill="white"), legend.position="right") +
   theme(strip.text=element_text(colour='grey20', size=11, face='italic')) +
   theme(legend.position = "bottom") +
