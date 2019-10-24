@@ -44,4 +44,7 @@ Rscript ./src/runSPAtest.R
 # HLA imputation, analyses, plots
 Rscript ./src/analysis.R
 
+# Replication of LINGO2 SNPs in FinnGen eye diseases
+Rscript ./src/SNPs_FG_replication.R
+
 
