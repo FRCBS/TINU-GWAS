@@ -85,97 +85,46 @@ dev.off()
 ## Manhattans
 ## --------------------------------------------------------
 
-# input data columns: SNP CHR BP P
-source('~/Projects/gamete/src/GGManhattan.R')
-
                          
+source('./scripts/GGManhattan.R')
+# SNP CHR BP P
+
 # Whole genome
 
 tmp <- SPA.TIN
 colnames(tmp) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
 tmp <- tmp[, c('SNP', 'CHR', 'BP', 'P')]
-cairo_pdf('./results/TIN_genomic.pdf', height=8, width=18)
+
+jpeg('./results/TIN_genomic.jpg', height=3.2, width=9, units='in', type='cairo', res=800)
 gg.manhattan(tmp %>% na.omit, threshold=filter(tmp, P<5e-8) %>% arrange(P) %>% .[1:3,] %>% .$P %>% max, 
              hlight=NA, sig=5e-8, 
-             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1.5,
-             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN GWAS')
+             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1,
+             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN with or without uveitis')
 dev.off()
+
 
 tmp <- SPA.TINU
 colnames(tmp) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
 tmp <- tmp[, c('SNP', 'CHR', 'BP', 'P')]
-cairo_pdf('./results/TINU_genomic.pdf', height=8, width=18)
+
+jpeg('./results/TINU_genomic.jpg', height=3.2, width=9, units='in', type='cairo', res=800)
 gg.manhattan(tmp %>% na.omit, threshold=filter(tmp, P<5e-8) %>% arrange(P) %>% .[1:3,] %>% .$P %>% max, 
              hlight=NA, sig=5e-8, 
-             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1.5,
-             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN with uveitis GWAS')
+             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1,
+             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN with uveitis')
 dev.off()
 
-tmp <- SPA.TINC
+
+tmp <- SPA.TINUC
 colnames(tmp) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
 tmp <- tmp[, c('SNP', 'CHR', 'BP', 'P')]
-cairo_pdf('./results/TINUC_genomic.pdf', height=8, width=18)
+
+jpeg('./results/TINUC_genomic.jpg', height=3.2, width=9, units='in', type='cairo', res=800)
 gg.manhattan(tmp %>% na.omit, threshold=filter(tmp, P<5e-8) %>% arrange(P) %>% .[1:3,] %>% .$P %>% max, 
              hlight=NA, sig=5e-8, 
-             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1.5,
-             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN with chronic uveitis GWAS')
+             sugg=max(tmp$P[which((tmp$P %>% p.adjust(., method='BH'))<0.05)]), pointsize=1,
+             col=brewer.pal(4, 'Blues')[3:4], ylims=c(0, 9), title='TIN with chronic uveitis')
 dev.off()
-
-
-
-# Specific regions
-
-tmp.fdr <- SPA.TIN %>% mutate(., FDR=p.adjust(PVALUE, method='BH')) %>% filter(., FDR<0.05) %>% .$PVALUE %>% max
-tmp <-SPA.TIN %>% filter(., CHR=='6', POS>29e6, POS<35e6)
-colnames(tmp) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
-tmp$CHR <- paste0('CHR ', tmp$CHR)
-
-p1 <- ggplot(tmp, aes(BP/1e6, log10(P) %>% ´*´(-1) )) +
-  geom_point(size=0.2, color='blue', alpha=0.5, shape=19) +
-  xlab('Chr 6 position (Mb)') +
-  ylab(expression('-log'[10]*'(p-value)')) +
-  geom_point(data=tmp %>% filter(P<5e-8), aes(x=BP/1e6, y=-log10(P)), 
-             color='red', shape=5, fill='red', alpha=0.8) +
-  #facet_grid(. ~ CHR) +
-  geom_hline(yintercept=log10(5e-8) %>% ´*´(-1), color='red', alpha=0.8, size=0.3) +
-  geom_hline(yintercept=log10(tmp.fdr) %>% ´*´(-1), color='red', alpha=0.8, size=0.3, linetype='dashed') +
-  annotate("rect", xmin=33.01, xmax=33.2, ymin=0, ymax=8.1, alpha=.12) +
-  annotate("rect", xmin=32.55, xmax=32.7, ymin=0, ymax=8.1, alpha=.12) +
-  annotate("text", x=33.01+2e-1, y=8.25, label='HLA-DPA1/DPB1', colour='grey20', size=3, fontface='italic') +
-  annotate("text", x=32.55-1e-1, y=8.5, label='HLA-DRB1', colour='grey20', size=3, fontface='italic') +
-  theme_classic2() +
-  theme(axis.line=element_line(size=0.3)) +
-  theme(panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank()) +
-  scale_x_continuous(breaks=seq(29, 35, 1)) +
-  scale_y_continuous(expand=c(0, .2), limits=c(0, 8.55)) 
-
-
-tmp2.fdr <- SPA.TINU %>% mutate(., FDR=p.adjust(PVALUE, method='BH')) %>% filter(., FDR<0.05) %>% .$PVALUE %>% max
-tmp2 <- SPA.TINU %>% filter(., CHR=='9', POS>25.0e6, POS<32.0e6)
-colnames(tmp2) <- c('P', 'BETA', 'CHR', 'BP', 'SNP')
-tmp2$CHR <- paste0('CHR ', tmp2$CHR)
-
-p2 <- ggplot(tmp2, aes(BP/1e6, log10(P) %>% ´*´(-1))) +
-  geom_point(size=0.2, color='blue', alpha=0.5, shape=19) +
-  xlab('Chr 9 position (Mb)') +
-  ylab(expression('-log'[10]*'(p-value)')) +
-  geom_point(data=tmp2 %>% filter(P<5e-8), aes(x=BP/1e6, y=-log10(P)), 
-             color='red', shape=5, fill='red', alpha=0.8) +
-  #facet_grid(. ~ CHR) +
-  geom_hline(yintercept=log10(5e-8) %>% ´*´(-1), color='red', alpha=0.8, size=0.3) +
-  geom_hline(yintercept=log10(tmp2.fdr) %>% ´*´(-1), color='red', alpha=0.8, size=0.3, linetype='dashed') +
-  annotate("rect", xmin=27.948, xmax=28.670, ymin=0, ymax=8.1, alpha=.1) +
-  annotate("text", x=28.30, y=8.4, label='LINGO2', colour='grey20', size=3, fontface='italic') +
-  theme_classic2() +
-  theme(axis.line=element_line(size=0.3)) +
-  theme(panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank()) +
-  scale_x_continuous(breaks=seq(25, 32, 2)) +
-  scale_y_continuous(expand=c(0, .2), limits=c(0, 8.55)) 
-
-cairo_pdf('./results/TIN_TINU_Manhattans.pdf', height=4, width=9)
-ggpubr::ggarrange(p1, p2, ncol=2, widths=c(1, 0.8), labels=c('a', 'b'))
-dev.off()
-
 
 
 
@@ -274,7 +223,7 @@ ggplot(ped.gen.num[nrow(ped.gen.num):1, ],
   theme_light() +
   theme(axis.text.x=element_text(angle=90, hjust=1, size=7), panel.grid=element_blank()) +
   theme(strip.background=element_rect(fill="white"), legend.position="right") +
-  theme(strip.text=element_text(colour='grey20', size=11, face='italic')) +
+  theme(strip.text=element_text(colour='grey20', size=11)) +
   theme(legend.position = "bottom") +
   guides(fill=guide_legend(title="Genotype"))
 dev.off()
@@ -436,8 +385,3 @@ write.table(rbind(runHLAfisher(tin.mhc.a, tin.uneg, 'A'),
                   runHLAfisher(tin.mhc.dqb1, tin.uneg, 'DQB1'), 
                   runHLAfisher(tin.mhc.dpb1, tin.uneg, 'DPB1')), 
             './results/TINUnegative_HLA_Fisher.tsv', row.names=F, sep='\t')  
-
-
-
-
-
